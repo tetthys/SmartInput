@@ -1,0 +1,19 @@
+{
+  "name": "smartinput",
+  "version": "0.1.0",
+  "main": "components/SmartField.js",
+  "description": "SmartInput React components for HTML5 inputs with socket validation and metadata injection.",
+  "author": "user",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "socket.io-client": "^4.7.2"
+  },
+  "keywords": [
+    "react",
+    "form",
+    "smartinput",
+    "socket.io"
+  ]
+}
