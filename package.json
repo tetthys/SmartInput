@@ -1,6 +1,6 @@
 {
   "name": "@tetthys/smartinput",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "SmartInput React components for HTML5 inputs with socket validation and metadata injection.",
   "author": "user",
   "license": "MIT",
