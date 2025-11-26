@@ -1,5 +1,5 @@
 {
-  "name": "smartinput",
+  "name": "@tetthys/smartinput",
   "version": "0.0.1",
   "main": "components/SmartField.js",
   "description": "SmartInput React components for HTML5 inputs with socket validation and metadata injection.",
