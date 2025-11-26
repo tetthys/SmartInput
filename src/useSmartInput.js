@@ -15,7 +15,6 @@ export function useSmartInput(name) {
   useEffect(() => {
     if (!socket) return;
 
-    // event handler
     const handler = (data) => {
       if (data && data.results && data.results[name]) {
         setValidation(data.results[name]);
@@ -33,6 +32,9 @@ export function useSmartInput(name) {
   const sendInput = useCallback(
     (value) => {
       if (!socket || !sessionId) return;
+
+      // Optionally check connection state; if needed:
+      // if (!socket.connected) return;
 
       socket.emit("smartinput:input", {
         sessionId,
