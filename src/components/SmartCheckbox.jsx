@@ -1,12 +1,10 @@
-// src/components/SmartCheckbox.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartCheckbox
- * - Checkbox input with SmartInput validation.
+ * - Checkbox integrated with SmartField.
  */
 export function SmartCheckbox({
   name,
@@ -15,6 +13,7 @@ export function SmartCheckbox({
   className,
   inputClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
@@ -22,10 +21,21 @@ export function SmartCheckbox({
       name={name}
       defaultValue={defaultValue}
       type="checkbox"
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      onChange={onChange}
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           <label className="inline-flex items-center">
             <input
+              {...fieldProps}
+              id={fieldName}
+              name={fieldName}
               type="checkbox"
               checked={Boolean(value)}
               onChange={(e) => setValue(e.target.checked)}

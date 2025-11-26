@@ -1,12 +1,10 @@
-// src/components/SmartSelect.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartSelect
- * - Select box with SmartInput validation.
+ * - Select box integrated with SmartField.
  * - options: [{ value, label }]
  */
 export function SmartSelect({
@@ -17,24 +15,43 @@ export function SmartSelect({
   className,
   selectClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
     <SmartField
       name={name}
       defaultValue={defaultValue}
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      options={options}
+      onChange={onChange}
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        options: fieldOptions,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           {label && (
-            <label className="block mb-1 text-sm font-medium">{label}</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              htmlFor={fieldName}
+            >
+              {label}
+            </label>
           )}
           <select
+            {...fieldProps}
+            id={fieldName}
+            name={fieldName}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className={selectClassName}
             {...props}
           >
-            {options.map((opt) => (
+            {fieldOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>

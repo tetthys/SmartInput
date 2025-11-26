@@ -1,12 +1,10 @@
-// src/components/SmartRadio.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartRadio
- * - Radio group with SmartInput validation.
+ * - Radio group integrated with SmartField.
  * - options: [{ value, label }]
  */
 export function SmartRadio({
@@ -17,6 +15,7 @@ export function SmartRadio({
   className,
   itemClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
@@ -24,20 +23,31 @@ export function SmartRadio({
       name={name}
       defaultValue={defaultValue}
       type="radio"
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      options={options}
+      onChange={onChange}
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        options: fieldOptions,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           {label && (
             <div className="block mb-1 text-sm font-medium">{label}</div>
           )}
           <div>
-            {options.map((opt) => (
+            {fieldOptions.map((opt) => (
               <label
                 key={opt.value}
                 className={itemClassName || "inline-flex items-center mr-4"}
               >
                 <input
+                  {...fieldProps}
                   type="radio"
-                  name={name}
+                  name={fieldName}
                   value={opt.value}
                   checked={value === opt.value}
                   onChange={() => setValue(opt.value)}

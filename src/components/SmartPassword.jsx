@@ -1,12 +1,10 @@
-// src/components/SmartPassword.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartPassword
- * - Password input with SmartInput validation.
+ * - Password input integrated with SmartField (SmartInput).
  */
 export function SmartPassword({
   name,
@@ -15,6 +13,7 @@ export function SmartPassword({
   className,
   inputClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
@@ -22,12 +21,28 @@ export function SmartPassword({
       name={name}
       defaultValue={defaultValue}
       type="password"
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      onChange={onChange}
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           {label && (
-            <label className="block mb-1 text-sm font-medium">{label}</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              htmlFor={fieldName}
+            >
+              {label}
+            </label>
           )}
           <input
+            {...fieldProps}
+            id={fieldName}
+            name={fieldName}
             type="password"
             value={value}
             onChange={(e) => setValue(e.target.value)}

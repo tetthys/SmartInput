@@ -1,12 +1,10 @@
-// src/components/SmartText.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartText
- * - Text input with SmartInput validation.
+ * - Text input integrated with SmartField (SmartInput).
  */
 export function SmartText({
   name,
@@ -15,6 +13,7 @@ export function SmartText({
   className,
   inputClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
@@ -22,12 +21,28 @@ export function SmartText({
       name={name}
       defaultValue={defaultValue}
       type="text"
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      onChange={onChange} // receives nextValue from SmartField
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           {label && (
-            <label className="block mb-1 text-sm font-medium">{label}</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              htmlFor={fieldName}
+            >
+              {label}
+            </label>
           )}
           <input
+            {...fieldProps}
+            id={fieldName}
+            name={fieldName}
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}

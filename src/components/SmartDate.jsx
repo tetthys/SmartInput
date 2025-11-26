@@ -1,12 +1,10 @@
-// src/components/SmartDate.jsx
-
 import React from "react";
 import { SmartField } from "../SmartField";
 import { FieldError } from "./FieldError";
 
 /**
  * SmartDate
- * - Date input with SmartInput validation.
+ * - Date input integrated with SmartField.
  */
 export function SmartDate({
   name,
@@ -15,6 +13,7 @@ export function SmartDate({
   className,
   inputClassName,
   errorClassName,
+  onChange,
   ...props
 }) {
   return (
@@ -22,12 +21,28 @@ export function SmartDate({
       name={name}
       defaultValue={defaultValue}
       type="date"
-      render={({ value, setValue, validation }) => (
-        <div className={className}>
+      onChange={onChange}
+      render={({
+        name: fieldName,
+        value,
+        setValue,
+        validation,
+        className: wrapperClassName,
+        ...fieldProps
+      }) => (
+        <div className={className || wrapperClassName}>
           {label && (
-            <label className="block mb-1 text-sm font-medium">{label}</label>
+            <label
+              className="block mb-1 text-sm font-medium"
+              htmlFor={fieldName}
+            >
+              {label}
+            </label>
           )}
           <input
+            {...fieldProps}
+            id={fieldName}
+            name={fieldName}
             type="date"
             value={value}
             onChange={(e) => setValue(e.target.value)}
