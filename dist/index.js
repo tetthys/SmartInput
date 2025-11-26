@@ -110,19 +110,30 @@ function SmartField({
   type,
   options,
   className,
+  onChange,
+  // 부모가 넘기는 onChange
   ...props
 }) {
   const [value, setValue] = (0, import_react3.useState)(
     type === "checkbox" ? Boolean(defaultValue) : defaultValue ?? ""
   );
   const { sendInput, validation } = useSmartInput(name);
+  const setValueAndNotify = (0, import_react3.useCallback)(
+    (nextValue) => {
+      setValue(nextValue);
+      if (typeof onChange === "function") {
+        onChange(nextValue);
+      }
+    },
+    [onChange]
+  );
   (0, import_react3.useEffect)(() => {
     sendInput(value);
   }, [value, sendInput]);
   return render({
     name,
     value,
-    setValue,
+    setValue: setValueAndNotify,
     validation,
     options,
     className,

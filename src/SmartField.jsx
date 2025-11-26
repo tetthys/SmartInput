@@ -1,6 +1,6 @@
 // src/SmartField.jsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSmartInput } from "./useSmartInput";
 
 /**
@@ -16,6 +16,7 @@ export function SmartField({
   type,
   options,
   className,
+  onChange, // 부모가 넘기는 onChange
   ...props
 }) {
   const [value, setValue] = useState(
@@ -24,6 +25,20 @@ export function SmartField({
 
   const { sendInput, validation } = useSmartInput(name);
 
+  // Local setter that also calls parent onChange if provided
+  const setValueAndNotify = useCallback(
+    (nextValue) => {
+      setValue(nextValue);
+      if (typeof onChange === "function") {
+        // 부모 onChange 에게도 알리고 싶으면 여기서 호출
+        // 부모 쪽에서 e.target.value 같은 게 필요 없고,
+        // 단순 값만 필요하다면 (nextValue)를 넘기는 쪽이 더 안전합니다.
+        onChange(nextValue);
+      }
+    },
+    [onChange]
+  );
+
   useEffect(() => {
     sendInput(value);
   }, [value, sendInput]);
@@ -31,7 +46,7 @@ export function SmartField({
   return render({
     name,
     value,
-    setValue,
+    setValue: setValueAndNotify,
     validation,
     options,
     className,

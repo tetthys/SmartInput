@@ -56,7 +56,7 @@ function useSmartInput(name) {
 }
 
 // src/SmartField.jsx
-import React2, { useEffect as useEffect3, useState as useState2 } from "react";
+import React2, { useEffect as useEffect3, useState as useState2, useCallback as useCallback2 } from "react";
 function SmartField({
   name,
   defaultValue,
@@ -64,19 +64,30 @@ function SmartField({
   type,
   options,
   className,
+  onChange,
+  // 부모가 넘기는 onChange
   ...props
 }) {
   const [value, setValue] = useState2(
     type === "checkbox" ? Boolean(defaultValue) : defaultValue ?? ""
   );
   const { sendInput, validation } = useSmartInput(name);
+  const setValueAndNotify = useCallback2(
+    (nextValue) => {
+      setValue(nextValue);
+      if (typeof onChange === "function") {
+        onChange(nextValue);
+      }
+    },
+    [onChange]
+  );
   useEffect3(() => {
     sendInput(value);
   }, [value, sendInput]);
   return render({
     name,
     value,
-    setValue,
+    setValue: setValueAndNotify,
     validation,
     options,
     className,
