@@ -1,55 +1,89 @@
-// src/SmartField.jsx
+import React, { useEffect, useState, useRef, useContext } from "react";
+import { SmartInputContext } from "./SmartInputProvider";
 
-import React, { useEffect, useState, useCallback } from "react";
-import { useSmartInput } from "./useSmartInput";
-
-/**
- * SmartField
- * - Manages local value state
- * - Sends value to SmartInput server via socket
- * - Provides validation result to render prop
- */
 export function SmartField({
   name,
-  defaultValue,
-  render,
   type,
-  options,
-  className,
-  onChange, // 부모가 넘기는 onChange
+  defaultValue,
+  onChange,
+  render,
   ...props
 }) {
-  const [value, setValue] = useState(
-    type === "checkbox" ? Boolean(defaultValue) : defaultValue ?? ""
-  );
+  const { socket, sessionId, bootstrap } = useContext(SmartInputContext);
 
-  const { sendInput, validation } = useSmartInput(name);
+  const [value, setValue] = useState(defaultValue ?? "");
+  const isDirty = useRef(false);
 
-  // Local setter that also calls parent onChange if provided
-  const setValueAndNotify = useCallback(
-    (nextValue) => {
-      setValue(nextValue);
-      if (typeof onChange === "function") {
-        // 부모 onChange 에게도 알리고 싶으면 여기서 호출
-        // 부모 쪽에서 e.target.value 같은 게 필요 없고,
-        // 단순 값만 필요하다면 (nextValue)를 넘기는 쪽이 더 안전합니다.
-        onChange(nextValue);
-      }
-    },
-    [onChange]
-  );
+  const [validation, setValidation] = useState(null);
 
+  /* -----------------------------------------
+   * 1) SmartInput 서버 validation 이벤트 수신
+   * ----------------------------------------- */
   useEffect(() => {
-    sendInput(value);
-  }, [value, sendInput]);
+    if (!socket) return;
+
+    const handler = (payload) => {
+      if (payload.results && payload.results[name]) {
+        setValidation(payload.results[name]);
+      }
+    };
+
+    socket.on("smartinput:validation", handler);
+    return () => socket.off("smartinput:validation", handler);
+  }, [socket, name]);
+
+  /* -----------------------------------------
+   * 2) 서버 bootstrap fields(injected/old 등)
+   * ----------------------------------------- */
+  useEffect(() => {
+    const fields = bootstrap.fields || {};
+
+    const serverField =
+      fields.injected?.[name] ?? fields.old?.[name] ?? undefined;
+
+    if (serverField !== undefined) {
+      const domValue = type === "checkbox" ? Boolean(serverField) : serverField;
+
+      // 사용자가 건드리지 않았으면 무조건 반영
+      if (!isDirty.current) {
+        setValue(domValue);
+        return;
+      }
+
+      // 사용자가 건드렸더라도 서버 origin은 최고 우선권
+      isDirty.current = false;
+      setValue(domValue);
+    }
+  }, [bootstrap, name, type]);
+
+  /* -----------------------------------------
+   * 3) 로컬 값 변경 시 SmartInput 서버 전송
+   * ----------------------------------------- */
+  useEffect(() => {
+    if (!socket || !sessionId) return;
+
+    // SmartInput 서버에 전송
+    socket.emit("smartinput:input", {
+      sessionId,
+      field_name: name,
+      field_value: value,
+    });
+  }, [value, socket, sessionId, name]);
+
+  /* -----------------------------------------
+   * 4) 값 변경 핸들러
+   * ----------------------------------------- */
+  const setValueSafe = (val) => {
+    isDirty.current = true;
+    setValue(val);
+    if (onChange) onChange(val);
+  };
 
   return render({
     name,
     value,
-    setValue: setValueAndNotify,
+    setValue: setValueSafe,
     validation,
-    options,
-    className,
     ...props,
   });
 }

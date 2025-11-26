@@ -1,66 +1,55 @@
-// src/SmartInputContext.jsx
-
-import React, { createContext, useMemo, useEffect } from "react";
+import React, { createContext, useMemo, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
-export const SmartInputContext = createContext({
-  socket: null,
-  sessionId: null,
-});
+export const SmartInputContext = createContext({});
 
-/**
- * SmartInputProvider
- * - Provides socket.io client and sessionId via context.
- * - Registers sessionId on connect so backend can map session -> socket.
- */
 export function SmartInputProvider({
   sessionId,
   socketUrl = "http://localhost:3000",
   children,
 }) {
-  // Create socket instance only when socketUrl changes
   const socket = useMemo(() => {
     return io(socketUrl, {
-      // Do not autoConnect here; we control in effect
       autoConnect: false,
-      // CORS / cookie-related options
+      transports: ["websocket"],
       withCredentials: true,
-      // Explicit transports to avoid some CORS/upgrade issues
-      transports: ["websocket", "polling"],
     });
   }, [socketUrl]);
 
+  const [bootstrap, setBootstrap] = useState({
+    ui: {},
+    flash: {},
+    fields: {},
+    smartinput: null,
+  });
+
+  const updateBootstrap = (data) => {
+    setBootstrap((prev) => ({
+      ...prev,
+      ui: { ...prev.ui, ...(data.ui || {}) },
+      flash: { ...prev.flash, ...(data.flash || {}) },
+      fields: { ...prev.fields, ...(data.fields || {}) },
+      smartinput: data.smartinput || prev.smartinput,
+    }));
+  };
+
   useEffect(() => {
-    if (!socket) return;
+    if (!socket.connected) socket.connect();
 
-    // Connect on mount if not connected
-    if (!socket.connected) {
-      socket.connect();
-    }
+    socket.emit("smartinput:register", { sessionId });
 
-    // On connect, register sessionId to backend (for emitToSocket)
-    const handleConnect = () => {
-      if (sessionId) {
-        socket.emit("smartinput:register", { sessionId });
-      }
-    };
-
-    socket.on("connect", handleConnect);
-
-    // If already connected when effect runs, register immediately
-    if (socket.connected) {
-      handleConnect();
-    }
-
-    // Cleanup on unmount / dependency change
-    return () => {
-      socket.off("connect", handleConnect);
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, [socket, sessionId]);
 
   return (
-    <SmartInputContext.Provider value={{ socket, sessionId }}>
+    <SmartInputContext.Provider
+      value={{
+        socket,
+        sessionId,
+        bootstrap,
+        updateBootstrap,
+      }}
+    >
       {children}
     </SmartInputContext.Provider>
   );
