@@ -1,14 +1,33 @@
 {
   "name": "@tetthys/smartinput",
-  "version": "0.0.3",
-  "main": "src/index.js",
+  "version": "0.0.7",
   "description": "SmartInput React components for HTML5 inputs with socket validation and metadata injection.",
   "author": "user",
   "license": "MIT",
+  "scripts": {
+    "build": "tsup"
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
   "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
     "socket.io-client": "^4.7.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
   },
   "keywords": [
     "react",
